@@ -22,9 +22,12 @@ class GStoreOutput < Fluent::TimeSlicedOutput
   config_param :gstore_sec_key, :string
   config_param :gstore_bucket, :string
 
+  config_param :format, :string, :default => 'out_file'
+
   def configure(conf)
     super
-    @timef = TimeFormatter.new(@time_format, @localtime)
+
+    @formatter = TextFormatter.create(conf)
   end
 
   def start
@@ -37,8 +40,7 @@ class GStoreOutput < Fluent::TimeSlicedOutput
   end
 
   def format(tag, time, record)
-    time_str = @timef.format(time)
-      "#{time_str}\t#{tag}\t#{record.to_json}\n"
+    @formatter.format(tag, time, record)
   end
 
   def exists?(source)
